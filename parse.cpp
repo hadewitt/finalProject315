@@ -7,6 +7,8 @@
 
 #include "thumbsim.hpp"
 
+// DO NOT EDIT
+ 
 void parseMem(ifstream & in, string type) {
   string s;
   unsigned int data, addr;

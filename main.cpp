@@ -1,6 +1,8 @@
 #include "thumbsim.hpp"
 #include "unistd.h"
 
+// DO NOT EDIT
+
 Memory<Data16,Data16> imem(0x8000);
 Memory<Data8,Data32> dmem(0xffff0000);
 Memory<Data32,Data32> rf(16, Data32(0));
