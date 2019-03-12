@@ -187,19 +187,15 @@ SP_Ops decode (const SP_Type data) {
   }
   else if (data.instr.add.op == 0) {
     // Here you'll need to SP_ADD similar to above
-    if (opts.instrs) { 
-      cout << "mov";
-      if (data.instr.mov.d) {
-        // These two cases handle stack pointer printing
-        if (data.instr.mov.rd == 5) {
-          cout << " sp, r" << setbase(10) << data.instr.mov.rm << endl;
-        }
-        else if (data.instr.mov.rm == 13) {
-          cout << " r" << setbase(10) << (8+data.instr.mov.rd) << ", sp" << endl;
+    if (opts.instrs) {
+      cout << "add";
+      if (data.instr.add.d) {
+        if (data.instr.add.rm == 13) {
+          cout << " sp, sp" << ", r" << setbase(10) << (8+data.instr.add.rd) << endl;
         }
         // this case is for registers greater than r7 that aren't sp
         else {
-          cout << " r" << setbase(10) << (8+data.instr.mov.rd) << ", r" << setbase(10) << data.instr.mov.rm << endl;
+          cout << " sp, r" << setbase(10) << (8+data.instr.add.rd) << ", r" << setbase(10) << data.instr.add.rm << endl;
         }
       }
       // another stack pointer case

@@ -1,4 +1,5 @@
 #include "thumbsim.hpp"
+#include <bitset>
 // These are just the register NUMBERS
 #define PC_REG 15
 #define LR_REG 14
@@ -183,6 +184,9 @@ void execute() {
   unsigned int list, mask;
   int num1, num2, result, BitCount;
   unsigned int bit;
+  int16_t magic_num;
+  int16_t regs;
+  
 
   /* Convert instruction to correct type */
   /* Types are described in Section A5 of the armv7 manual */
@@ -345,6 +349,28 @@ void execute() {
       switch(misc_ops) {
         case MISC_PUSH:
           // need to implement
+          BitCount  = 0;
+          magic_num  = misc.instr.push.m;
+          regs = misc.instr.push.reg_list;
+          magic_num <<= 14;
+          magic_num |= regs;
+
+          for(i=0; i<14; i++){
+            if(regs & 1)
+              BitCount++;
+            regs >>= 1;
+          }
+
+          addr = SP - 4*BitCount;
+
+          for(i=0; i<14; i++){
+            if(magic_num & 1){
+              dmem.write(addr, rf[i]);
+              addr += 4;
+            }
+          }
+
+          rf.write(SP_REG, SP - 4*BitCount);
           break;
         case MISC_POP:
           // need to implement
