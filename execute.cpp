@@ -374,6 +374,25 @@ void execute() {
           break;
         case MISC_POP:
           // need to implement
+         BitCount = 0;
+         magic_num = misc.instr.pop.m;
+         regs = misc.instr.push.reg_list;
+         magic_num <<= 15;
+         magic_num |= regs;
+
+         for (i=0; i < 14; i++){
+            if (regs & 1)
+               BitCount++;
+            regs >>= 1;
+         }
+
+         addr = SP;
+
+         for (i=0; i<14; i++) {
+            if(magic_num & 1){
+               rf.write
+         
+
           break;
         case MISC_SUB:
           // functionally complete, needs stats
