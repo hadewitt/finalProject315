@@ -182,7 +182,7 @@ void execute() {
   unsigned int addr;
   int i, n, offset;
   unsigned int list, mask;
-  int num1, num2, result, BitCount;
+  int num1, num2, result, BitCount, immediate;
   unsigned int bit;
   int16_t magic_num;
   int16_t regs;
@@ -240,10 +240,14 @@ void execute() {
           break;
         case ALU_MOV:
           // needs stats and flags
-          
+          stats.numRegWrites++;
+
+          immediate = signExtend8to32ui(alu.instr.mov.imm);
+
           rf.write(alu.instr.mov.rdn, alu.instr.mov.imm);
           break;
         case ALU_CMP:
+          
           break;
         case ALU_ADD8I:
           // needs stats and flags
