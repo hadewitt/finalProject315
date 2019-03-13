@@ -240,6 +240,7 @@ void execute() {
           break;
         case ALU_MOV:
           // needs stats and flags
+          
           rf.write(alu.instr.mov.rdn, alu.instr.mov.imm);
           break;
         case ALU_CMP:
@@ -368,31 +369,35 @@ void execute() {
               dmem.write(addr, rf[i]);
               addr += 4;
             }
+            magic_num >>= 1;
           }
 
           rf.write(SP_REG, SP - 4*BitCount);
           break;
         case MISC_POP:
           // need to implement
-         BitCount = 0;
-         magic_num = misc.instr.pop.m;
-         regs = misc.instr.push.reg_list;
-         magic_num <<= 15;
-         magic_num |= regs;
+          BitCount = 0;
+          magic_num = misc.instr.pop.m;
+          magic_num <<= 15;
+          magic_num |= regs;
 
-         for (i=0; i < 14; i++){
-            if (regs & 1)
-               BitCount++;
-            regs >>= 1;
-         }
+          addr = SP;
 
-         addr = SP;
-
-         for (i=0; i<14; i++) {
+          for (i=0; i<14; i++) {
             if(magic_num & 1){
-               rf.write
-         
+               rf.write(i, dmem[addr]);
+               addr += 4;
+               BitCount++;
+            }
+            magic_num >>= 1;
+          }
 
+          magic_num >>= 2;
+
+          if(magic_num & 1)
+            rf.write(PC_REG, dmem[addr]);
+
+          rf.write(SP_REG, SP + 4*BitCount);
           break;
         case MISC_SUB:
           // functionally complete, needs stats
