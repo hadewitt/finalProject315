@@ -1,5 +1,5 @@
 #include "thumbsim.hpp"
-#include <bitset>
+
 // These are just the register NUMBERS
 #define PC_REG 15
 #define LR_REG 14
@@ -24,6 +24,20 @@ unsigned int signExtend8to32ui(char i) {
   return static_cast<unsigned int>(static_cast<int>(i));
 }
 
+unsigned int signExtend11to32ui(int i){
+  int mask = 2048;
+  int ext = 0;
+
+  if(i & 1024)
+    while(mask != 0){
+      i |= mask;
+      mask <<= 1;
+    }
+  ext |= i;
+
+  return ext;
+}
+
 // This is the global object you'll use to store condition codes N,Z,V,C
 // Set these bits appropriately in execute below.
 ASPR flags;
@@ -31,6 +45,16 @@ ASPR flags;
 // CPE 315: You need to implement a function to set the Negative and Zero
 // flags for each instruction that does that. It only needs to take
 // one parameter as input, the result of whatever operation is executing
+void setNegativeZero(int input){
+  if(input == 0)
+    flags.Z = 1;
+  else if(input < 0)
+    flags.N = 1;
+  else{
+    flags.N = 0;
+    flags.Z = 0;
+  }
+}
 
 // This function is complete, you should not have to modify it
 void setCarryOverflow (int num1, int num2, OFType oftype) {
@@ -240,14 +264,14 @@ void execute() {
           break;
         case ALU_MOV:
           // needs stats and flags
-          stats.numRegWrites++;
-
-          immediate = signExtend8to32ui(alu.instr.mov.imm);
-
           rf.write(alu.instr.mov.rdn, alu.instr.mov.imm);
+          setNegativeZero(rf[alu.instr.mov.rdn]);
+          stats.numRegWrites++;
           break;
         case ALU_CMP:
-          
+          setCarryOverflow(rf[alu.instr.cmp.rdn], alu.instr.cmp.imm, OF_SUB);
+          setNegativeZero(rf[alu.instr.cmp.rdn] - alu.instr.cmp.imm);
+          stats.numRegReads++;
           break;
         case ALU_ADD8I:
           // needs stats and flags
@@ -426,6 +450,7 @@ void execute() {
       // Essentially the same as the conditional branches, but with no
       // condition check, and an 11-bit immediate field
       decode(uncond);
+      rf.write(PC_REG, PC + 2 * signExtend11to32ui(cond.instr.b.imm) + 2);
       break;
     case LDM:
       decode(ldm);
