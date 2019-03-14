@@ -424,8 +424,8 @@ void execute() {
 
           rf.write(SP_REG, SP - 4*BitCount);
 
-          stats.numRegReads += BitCount + 1;
-          stats.numMemWrites += BitCount;
+          stats.numRegReads += (BitCount + 1);
+          stats.numMemWrites += BitCount + 1;
           stats.numRegWrites++;
           break;
         case MISC_POP:
@@ -457,7 +457,7 @@ void execute() {
           rf.write(SP_REG, SP + 4*BitCount);
 
           stats.numRegReads += 1;
-          stats.numMemReads += BitCount;
+          stats.numMemReads += (BitCount + 1);
           stats.numRegWrites += BitCount + 1;
           break;
         case MISC_SUB:
@@ -479,8 +479,19 @@ void execute() {
       // Once you've completed the checkCondition function,
       // this should work for all your conditional branches.
       // needs stats
+      stats.numBranches++;
       if (checkCondition(cond.instr.b.cond)){
         rf.write(PC_REG, PC + 2 * signExtend8to32ui(cond.instr.b.imm) + 2);
+        if(cond.instr.b.imm < 0)
+          stats.numForwardBranchesTaken++;
+        else if(cond.instr.b.imm > 0)
+          stats.numBackwardBranchesTaken++;
+      }
+      else{
+        if(cond.instr.b.imm < 0)
+          stats.numForwardBranchesNotTaken++;
+        else if(cond.instr.b.imm > 0)
+          stats.numBackwardBranchesNotTaken++;
       }
       stats.numRegWrites++;
       stats.numRegReads++;
