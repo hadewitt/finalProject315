@@ -236,6 +236,9 @@ void execute() {
 
   // This counts as a write to the PC register
   rf.write(PC_REG, pctarget);
+  stats.numRegWrites++;
+  stats.numRegReads++;
+  stats.instrs++;
 
   itype = decode(ALL_Types(instr));
 
@@ -421,7 +424,7 @@ void execute() {
 
           rf.write(SP_REG, SP - 4*BitCount);
 
-          stats.numRegReads += BitCount + 2;
+          stats.numRegReads += BitCount + 1;
           stats.numMemWrites += BitCount;
           stats.numRegWrites++;
           break;
@@ -453,7 +456,7 @@ void execute() {
 
           rf.write(SP_REG, SP + 4*BitCount);
 
-          stats.numRegReads += 2;
+          stats.numRegReads += 1;
           stats.numMemReads += BitCount;
           stats.numRegWrites += BitCount + 1;
           break;
