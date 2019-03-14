@@ -251,16 +251,24 @@ void execute() {
         case ALU_ADDR:
           // needs stats and flags
           rf.write(alu.instr.addr.rd, rf[alu.instr.addr.rn] + rf[alu.instr.addr.rm]);
+          stats.numRegReads += 2;
+          stats.numRegWrites++;
           break;
         case ALU_SUBR:
           rf.write(alu.instr.subr.rd, rf[alu.instr.subr.rn] - rf[alu.instr.subr.rm]);
+          stats.numRegReads += 2;
+          stats.numRegWrites++;
           break;
         case ALU_ADD3I:
           // needs stats and flags
           rf.write(alu.instr.add3i.rd, rf[alu.instr.add3i.rn] + alu.instr.add3i.imm);
+          stats.numRegReads++;
+          stats.numRegWrites++;
           break;
         case ALU_SUB3I:
           rf.write(alu.instr.sub3i.rd, rf[alu.instr.sub3i.rn] - alu.instr.sub3i.imm);
+          stats.numRegReads++;
+          stats.numRegWrites++;
           break;
         case ALU_MOV:
           // needs stats and flags
@@ -276,9 +284,13 @@ void execute() {
         case ALU_ADD8I:
           // needs stats and flags
           rf.write(alu.instr.add8i.rdn, rf[alu.instr.add8i.rdn] + alu.instr.add8i.imm);
+          stats.numRegReads++;
+          stats.numRegWrites++;
           break;
         case ALU_SUB8I:
           rf.write(alu.instr.sub8i.rdn, rf[alu.instr.sub8i.rdn] - alu.instr.add8i.imm);
+          stats.numRegReads++;
+          stats.numRegWrites++;
           break;
         default:
           cout << "instruction not implemented" << endl;
@@ -331,6 +343,8 @@ void execute() {
         case SP_MOV:
           // needs stats and flags
           rf.write((sp.instr.mov.d << 3 ) | sp.instr.mov.rd, rf[sp.instr.mov.rm]);
+          stats.numRegReads++;
+          stats.numRegWrites++;
           break;
         case SP_ADD:
         case SP_CMP:
@@ -347,11 +361,16 @@ void execute() {
           // functionally complete, needs stats
           addr = rf[ld_st.instr.ld_st_imm.rn] + ld_st.instr.ld_st_imm.imm * 4;
           dmem.write(addr, rf[ld_st.instr.ld_st_imm.rt]);
+          stats.numRegReads += 2;
+          stats.numMemWrites++;
           break;
         case LDRI:
           // functionally complete, needs stats
           addr = rf[ld_st.instr.ld_st_imm.rn] + ld_st.instr.ld_st_imm.imm * 4;
           rf.write(ld_st.instr.ld_st_imm.rt, dmem[addr]);
+          stats.numRegReads++;
+          stats.numRegWrites++;
+          stats.numMemReads++;
           break;
         case STRR:
           // need to implement
@@ -401,6 +420,10 @@ void execute() {
           }
 
           rf.write(SP_REG, SP - 4*BitCount);
+
+          stats.numRegReads += BitCount + 2;
+          stats.numMemWrites += BitCount;
+          stats.numRegWrites++;
           break;
         case MISC_POP:
           // need to implement
@@ -422,18 +445,29 @@ void execute() {
 
           magic_num >>= 2;
 
-          if(magic_num & 1)
+          if(magic_num & 1){
             rf.write(PC_REG, dmem[addr]);
+            stats.numRegWrites++;
+            stats.numMemReads++;
+          }
 
           rf.write(SP_REG, SP + 4*BitCount);
+
+          stats.numRegReads += 2;
+          stats.numMemReads += BitCount;
+          stats.numRegWrites += BitCount + 1;
           break;
         case MISC_SUB:
           // functionally complete, needs stats
           rf.write(SP_REG, SP - (misc.instr.sub.imm*4));
+          stats.numRegReads++;
+          stats.numRegWrites++;
           break;
         case MISC_ADD:
           // functionally complete, needs stats
           rf.write(SP_REG, SP + (misc.instr.add.imm*4));
+          stats.numRegReads++;
+          stats.numRegWrites++;
           break;
       }
       break;
@@ -445,12 +479,16 @@ void execute() {
       if (checkCondition(cond.instr.b.cond)){
         rf.write(PC_REG, PC + 2 * signExtend8to32ui(cond.instr.b.imm) + 2);
       }
+      stats.numRegWrites++;
+      stats.numRegReads++;
       break;
     case UNCOND:
       // Essentially the same as the conditional branches, but with no
       // condition check, and an 11-bit immediate field
       decode(uncond);
       rf.write(PC_REG, PC + 2 * signExtend11to32ui(cond.instr.b.imm) + 2);
+      stats.numRegReads++;
+      stats.numRegWrites++;
       break;
     case LDM:
       decode(ldm);
@@ -485,6 +523,8 @@ void execute() {
       // needs stats
       decode(addsp);
       rf.write(addsp.instr.add.rd, SP + (addsp.instr.add.imm*4));
+      stats.numRegReads++;
+      stats.numRegWrites++;
       break;
     default:
       cout << "[ERROR] Unknown Instruction to be executed" << endl;
