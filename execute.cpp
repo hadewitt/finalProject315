@@ -366,6 +366,7 @@ void execute() {
           dmem.write(addr, rf[ld_st.instr.ld_st_imm.rt]);
           stats.numRegReads += 2;
           stats.numMemWrites++;
+          caches.access(addr);
           break;
         case LDRI:
           // functionally complete, needs stats
@@ -374,6 +375,7 @@ void execute() {
           stats.numRegReads++;
           stats.numRegWrites++;
           stats.numMemReads++;
+          caches.access(addr);
           break;
         case STRR:
           // need to implement
@@ -417,6 +419,7 @@ void execute() {
           for(i=0; i<14; i++){
             if(magic_num & 1){
               dmem.write(addr, rf[i]);
+              caches.access(addr);
               addr += 4;
             }
             magic_num >>= 1;
@@ -440,6 +443,7 @@ void execute() {
           for (i=0; i<14; i++) {
             if(magic_num & 1){
                rf.write(i, dmem[addr]);
+               caches.access(addr);
                addr += 4;
                BitCount++;
             }
@@ -450,6 +454,7 @@ void execute() {
 
           if(magic_num & 1){
             rf.write(PC_REG, dmem[addr]);
+            caches.access(addr);
             stats.numRegWrites++;
             stats.numMemReads++;
           }
@@ -532,6 +537,7 @@ void execute() {
       stats.numRegReads++;
       // One mem read, even though it's imem, and there's two of them
       stats.numMemReads++;
+      caches.access(addr);
       break;
     case ADD_SP:
       // needs stats
