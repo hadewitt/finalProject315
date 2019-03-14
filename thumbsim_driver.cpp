@@ -112,7 +112,8 @@ bool Cache::access(unsigned int address) {
   int numBlocks = size / blocksize;
   int ind = address % numBlocks;
   int tagOff = log2(blocksize);
-  int tag = address >> tagOff;
+  int indOff = log2(numBlocks);
+  int tag = address >> (tagOff + indOff);
   if (entries[ind] == tag){
       hits++;
       return true;
