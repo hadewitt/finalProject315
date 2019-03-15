@@ -428,7 +428,7 @@ void execute() {
           rf.write(SP_REG, SP - 4*BitCount);
 
           stats.numRegReads += (BitCount + 1);
-          stats.numMemWrites += BitCount + 1;
+          stats.numMemWrites += (BitCount + 1);
           stats.numRegWrites++;
           break;
         case MISC_POP:
@@ -463,7 +463,7 @@ void execute() {
 
           stats.numRegReads += 1;
           stats.numMemReads += (BitCount + 1);
-          stats.numRegWrites += BitCount + 1;
+          stats.numRegWrites += (BitCount + 1);
           break;
         case MISC_SUB:
           // functionally complete, needs stats
